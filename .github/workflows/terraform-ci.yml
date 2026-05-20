@@ -32,16 +32,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Configure AWS Credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.1.1
         with:
           role-to-assume: arn:aws:iam::779403607170:role/GithubActionsAssumeRole
           aws-region: ap-south-1
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v2.0.3
 
       - name: Terraform Init
         working-directory: terraform
@@ -56,7 +56,7 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: tfplan
           path: terraform/tfplan
@@ -72,10 +72,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.1.1
         with:
           role-to-assume: arn:aws:iam::779403607170:role/GithubActionsAssumeRole
           aws-region: ap-south-1
@@ -86,7 +86,7 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Download Terraform Plan
-        uses: actions/download-artifact@v4
+        uses: actions/setup-terraform@v2.0.3
         with:
           name: tfplan
           path: terraform
