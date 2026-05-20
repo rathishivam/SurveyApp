@@ -1,0 +1,115 @@
+/**
+ * CreateSurveyPage Styles
+ */
+.create-survey-page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.form-container {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 700px;
+}
+
+.form-container h1 {
+  color: var(--secondary-color);
+  margin-bottom: 30px;
+  font-size: 32px;
+  text-align: center;
+}
+
+form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+.questions-section {
+  margin-bottom: 30px;
+}
+
+.questions-section h3 {
+  color: var(--secondary-color);
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.question-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: flex-start;
+}
+
+.question-input-group input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.question-input-group .btn {
+  padding: 12px 15px;
+  white-space: nowrap;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.form-actions .btn {
+  flex: 1;
+  padding: 12px 20px;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    padding: 25px;
+  }
+
+  .form-container h1 {
+    font-size: 24px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}
