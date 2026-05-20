@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: tfplan
-          path: terraform/tfplan
+          path: terraform/dev/tfplan
 
   terraform-apply:
     name: Terraform Apply
@@ -91,7 +91,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan
-          path: terraform
+          path: terraform/dev
 
       - name: Terraform Init
         working-directory: terraform/dev
