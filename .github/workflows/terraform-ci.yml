@@ -43,23 +43,25 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Cd terraform
-        run: cd terraform
-        
       - name: Terraform Init
+        working-directory: terraform
         run: terraform init
 
       - name: Terraform Validate
+        working-directory: terraform
         run: terraform validate
 
       - name: Terraform Plan
         if: github.event.inputs.action == 'plan' || github.event_name == 'push'
+        working-directory: terraform
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
+        working-directory: terraform
         run: terraform apply -auto-approve tfplan
 
       - name: Terraform Destroy
         if: github.event.inputs.action == 'destroy'
+        working-directory: terraform
         run: terraform destroy -auto-approve
