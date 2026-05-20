@@ -43,6 +43,9 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Cd terraform
+        run: cd terraform
+        
       - name: Terraform Init
         run: terraform init
 
