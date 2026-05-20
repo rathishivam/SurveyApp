@@ -42,6 +42,8 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.3
+        with:
+          terraform_version: 1.8.5
 
       - name: Terraform Init
         working-directory: terraform
@@ -81,12 +83,12 @@ jobs:
           aws-region: ap-south-1
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v2.0.3
         with:
           terraform_version: 1.8.5
 
       - name: Download Terraform Plan
-        uses: actions/setup-terraform@v2.0.3
+        uses: actions/download-artifact@v3.1.0
         with:
           name: tfplan
           path: terraform
