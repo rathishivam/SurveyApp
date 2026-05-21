@@ -2,9 +2,14 @@ name: Backend CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
 
 env:
   ECR_REPOSITORY: backend
@@ -13,33 +18,39 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     permissions:
+      id-token: write
       contents: read
-      packages: write
+
+    timeout-minutes: 30
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6.1.1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::779403607170:role/GithubActionsAssumeRole
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Ensure ECR repository exists
         run: |
-          aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} || \
-          aws ecr create-repository --repository-name ${{ env.ECR_REPOSITORY }}
+          aws ecr describe-repositories \
+            --repository-names ${{ env.ECR_REPOSITORY }} \
+          || \
+          aws ecr create-repository \
+            --repository-name ${{ env.ECR_REPOSITORY }}
 
-      - name: Login to ECR
+      - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
@@ -48,8 +59,13 @@ jobs:
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Image info
+      - name: Image Info
+        id: image
         run: |
-          echo "IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}" 
-          echo "::set-output name=image::${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+          echo "IMAGE=${IMAGE_URI}"
+          echo "image=${IMAGE_URI}" >> $GITHUB_OUTPUT
