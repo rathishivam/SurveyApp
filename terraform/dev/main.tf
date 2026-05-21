@@ -61,11 +61,16 @@ data "aws_eks_cluster_auth" "this" {
   name = module.eks.cluster_name
 }
 
+# Fetch the OIDC provider certificate to dynamically extract the thumbprint
+data "tls_certificate" "cluster" {
+  url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
+}
+
 # Register the EKS OIDC provider in IAM so pods can assume roles via service accounts
 resource "aws_iam_openid_connect_provider" "eks" {
   url             = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [var.oidc_thumbprint]
+  thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
 }
 
 # Example: create an IAM role that a Kubernetes ServiceAccount can assume (IRSA)
@@ -164,6 +169,17 @@ dex:
   enabled: false
 YAML
   ]
+
+  argocd_app_enabled               = true
+  argocd_app_name                  = "${var.project}-${var.env}-app"
+  argocd_app_project               = var.argocd_app_project
+  argocd_app_repo_url              = var.argocd_app_repo_url
+  argocd_app_repo_path             = var.argocd_app_repo_path
+  argocd_app_repo_revision         = var.argocd_app_repo_revision
+  argocd_app_destination_namespace = var.argocd_app_destination_namespace
+  argocd_app_sync_enabled          = var.argocd_app_sync_enabled
+  argocd_app_prune                 = var.argocd_app_prune
+  argocd_app_self_heal             = var.argocd_app_self_heal
 }
 
 # Outputs to verify deployment values.
