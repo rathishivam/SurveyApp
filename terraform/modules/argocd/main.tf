@@ -14,7 +14,7 @@ module "argocd_helm" {
 }
 
 resource "kubernetes_manifest" "argocd_application" {
-  count = var.argocd_app_enabled && length(trim(var.argocd_app_repo_url)) > 0 ? 1 : 0
+  count = var.argocd_app_enabled && var.argocd_app_repo_url != "" ? 1 : 0
 
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
