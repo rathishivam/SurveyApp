@@ -21,6 +21,12 @@ resource "aws_internet_gateway" "this" {
   })
 }
 
+locals {
+  cluster_discovery_tags = var.cluster_name != "" ? {
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+  } : {}
+}
+
 # Public subnets in the VPC
 resource "aws_subnet" "public" {
   for_each = { for idx, subnet in var.public_subnets : idx => subnet }
@@ -31,9 +37,10 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = each.value.map_public_ip_on_launch
 
   tags = merge(var.tags, {
-    Name = each.value.name
-    Type = "public"
-  })
+    Name                     = each.value.name
+    Type                     = "public"
+    "kubernetes.io/role/elb" = "1"
+  }, local.cluster_discovery_tags)
 }
 
 # Private subnets in the VPC
@@ -45,9 +52,10 @@ resource "aws_subnet" "private" {
   availability_zone = each.value.availability_zone
 
   tags = merge(var.tags, {
-    Name = each.value.name
-    Type = "private"
-  })
+    Name                           = each.value.name
+    Type                           = "private"
+    "kubernetes.io/role/internal-elb" = "1"
+  }, local.cluster_discovery_tags)
 }
 
 # Elastic IP used by the NAT Gateway

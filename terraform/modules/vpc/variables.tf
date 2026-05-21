@@ -36,6 +36,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "cluster_name" {
+  type        = string
+  description = "EKS cluster name used to tag subnets for Kubernetes discovery"
+  default     = ""
+}
+
 variable "enable_igw" {
   type        = bool
   description = "Enable creation of an Internet Gateway for public subnets"

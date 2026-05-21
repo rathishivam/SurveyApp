@@ -11,6 +11,11 @@ variable "env" {
   default = "dev"
 }
 
+variable "aws_region" {
+  type    = string
+  default = "ap-south-1"
+}
+
 variable "vpc_name" {
   type    = string
   default = "survey-app-dev-vpc"
@@ -22,7 +27,7 @@ variable "vpc_cidr" {
 }
 
 variable "tags" {
-  type    = map(string)
+  type = map(string)
   default = {
     Environment = "dev"
   }
@@ -74,4 +79,112 @@ variable "private_subnets" {
       availability_zone = "ap-south-1b"
     }
   ]
+}
+
+variable "eks_cluster_version" {
+  type    = string
+  default = "1.28"
+}
+
+variable "eks_node_instance_type" {
+  type    = string
+  default = "t3.medium"
+}
+
+variable "eks_node_desired_size" {
+  type    = number
+  default = 2
+}
+
+variable "eks_node_min_size" {
+  type    = number
+  default = 1
+}
+
+variable "eks_node_max_size" {
+  type    = number
+  default = 3
+}
+
+variable "eks_addon_names" {
+  type    = list(string)
+  default = ["vpc-cni", "coredns", "kube-proxy"]
+}
+
+variable "ui_bucket_name" {
+  type    = string
+  default = "survey-app-dev-ui-bucket"
+}
+
+variable "cloudfront_default_root_object" {
+  type    = string
+  default = "index.html"
+}
+
+variable "argocd_chart_version" {
+  type    = string
+  default = "5.47.0"
+}
+
+variable "db_engine" {
+  type    = string
+  default = "postgres"
+}
+
+variable "db_engine_version" {
+  type    = string
+  default = "15"
+}
+
+variable "db_port" {
+  type    = number
+  default = 5432
+}
+
+variable "db_username" {
+  type        = string
+  description = "Database username for the RDS instance"
+}
+
+variable "db_password" {
+  type        = string
+  description = "Database password for the RDS instance"
+  sensitive   = true
+}
+
+variable "db_instance_class" {
+  type    = string
+  default = "db.t3.micro"
+}
+
+variable "db_allocated_storage" {
+  type    = number
+  default = 20
+}
+
+variable "db_allowed_cidrs" {
+  type        = list(string)
+  description = "CIDR blocks allowed to connect to the DB (for dev/testing)"
+  default     = ["0.0.0.0/0"]
+}
+
+variable "db_publicly_accessible" {
+  type    = bool
+  default = false
+}
+
+variable "db_backup_retention_period" {
+  type    = number
+  default = 0
+}
+
+variable "db_deletion_protection" {
+  type    = bool
+  default = false
+}
+
+variable "oidc_thumbprint" {
+  type        = string
+  description = "SHA1 thumbprint for the EKS OIDC issuer certificate. Obtain with openssl or set before apply."
+  default     = ""
 }
