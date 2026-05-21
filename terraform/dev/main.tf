@@ -55,6 +55,8 @@ module "eks" {
 ## Create OIDC provider for IRSA (uses cluster identity from created EKS cluster)
 data "aws_eks_cluster" "this" {
   name = module.eks.cluster_name
+
+  depends_on = [module.eks]
 }
 
 data "aws_eks_cluster_auth" "this" {
@@ -180,6 +182,8 @@ YAML
   argocd_app_sync_enabled          = var.argocd_app_sync_enabled
   argocd_app_prune                 = var.argocd_app_prune
   argocd_app_self_heal             = var.argocd_app_self_heal
+
+  depends_on = [module.eks_addons]
 }
 
 # Outputs to verify deployment values.

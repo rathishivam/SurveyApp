@@ -44,4 +44,9 @@ resource "kubernetes_manifest" "argocd_application" {
   }
 
   depends_on = [module.argocd_helm]
+
+  # Wait a bit for ArgoCD to be fully ready before creating the Application
+  timeouts {
+    create = "5m"
+  }
 }
