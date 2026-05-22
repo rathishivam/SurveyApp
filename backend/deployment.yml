@@ -1,4 +1,3 @@
-```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -161,4 +160,3 @@ spec:
                 name: backend-service
                 port:
                   number: 80
-```
