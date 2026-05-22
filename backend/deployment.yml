@@ -4,26 +4,24 @@ metadata:
   name: app
 
 ---
-# Service Account with IAM Role for Service Account (IRSA)
-# Replace ROLE_ARN with your Secrets Manager access role ARN
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: backend-sa
   namespace: app
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:eks:ap-south-1:779403607170:cluster/survey-app-eks
+    eks.amazonaws.com/role-arn: arn:aws:iam::779403607170:role/survery-app-backend-sa
 
 ---
-# SecretProviderClass for AWS Secrets Manager
-# This pulls DATABASE_URL from AWS Secrets Manager
 apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:
   name: backend-secrets
   namespace: app
+
 spec:
   provider: aws
+
   parameters:
     objects: |
       - objectName: "rds!db-7b7fc848-82ea-46e5-abb5-2c9128e4bbac"
@@ -45,8 +43,7 @@ kind: Deployment
 metadata:
   name: backend
   namespace: app
-  labels:
-    app: backend
+
 spec:
   replicas: 2
 
@@ -86,13 +83,14 @@ spec:
 
           volumeMounts:
             - name: secrets-store-inline
-              mountPath: "/mnt/secrets-store"
+              mountPath: /mnt/secrets-store
               readOnly: true
 
           resources:
             requests:
               cpu: "250m"
               memory: "256Mi"
+
             limits:
               cpu: "500m"
               memory: "512Mi"
@@ -117,6 +115,7 @@ kind: Service
 metadata:
   name: backend-service
   namespace: app
+
 spec:
   type: ClusterIP
 
@@ -134,19 +133,12 @@ kind: Ingress
 metadata:
   name: backend-ingress
   namespace: app
+
   annotations:
     kubernetes.io/ingress.class: alb
-
-    # Internet-facing ALB
     alb.ingress.kubernetes.io/scheme: internet-facing
-
-    # IP mode for EKS
     alb.ingress.kubernetes.io/target-type: ip
-
-    # Health check
     alb.ingress.kubernetes.io/healthcheck-path: /health
-
-    # Listener
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
 
 spec:
