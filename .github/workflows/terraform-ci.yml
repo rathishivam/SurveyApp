@@ -17,6 +17,7 @@ permissions:
 jobs:
     plan:
       runs-on: ubuntu-latest
+      environment: dev
 
       env:
         AWS_REGION: ap-south-1

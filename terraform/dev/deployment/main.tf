@@ -15,7 +15,7 @@ resource "kubernetes_manifest" "argocd_application" {
 
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
-    kind       = "Application"
+    kind       = "CustomResourceDefinition"
     metadata = {
       name      = "${var.project}-${var.env}-app"
       namespace = "argocd"
