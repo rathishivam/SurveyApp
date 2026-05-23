@@ -1,14 +1,14 @@
-locals {
-  cluster_name = "${var.project}-${var.env}-eks"
-}
+# locals {
+#   cluster_name = "${var.project}-${var.env}-eks"
+# }
 
-data "aws_eks_cluster" "this" {
-  name = local.cluster_name
-}
+# data "aws_eks_cluster" "this" {
+#   name = local.cluster_name
+# }
 
-data "aws_eks_cluster_auth" "this" {
-  name = local.cluster_name
-}
+# data "aws_eks_cluster_auth" "this" {
+#   name = local.cluster_name
+# }
 
 resource "kubernetes_manifest" "argocd_application" {
   count = var.argocd_app_repo_url != "" ? 1 : 0
