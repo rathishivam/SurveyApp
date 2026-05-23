@@ -34,12 +34,16 @@ private_subnets = [
     availability_zone = "ap-south-1b"
   }
 ]
-eks_cluster_version            = "1.29"
-eks_node_instance_type         = "t3.small"
+eks_cluster_version            = "1.35"
+eks_node_instance_type         = "t3a.medium"
 eks_node_desired_size          = 2
-eks_node_min_size              = 1
+eks_node_min_size              = 2
 eks_node_max_size              = 2
 eks_addon_names                = ["vpc-cni", "coredns", "kube-proxy"]
+vpc_cni_irsa_policy_arns = ["arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"]
+vpc_cni_sa_name ="aws-node"
+vpc_cni_namespace = "kube-system"
+
 ui_bucket_name                 = "survey-app-dev-ui-bucket"
 cloudfront_default_root_object = "index.html"
 argocd_chart_version           = "5.47.0"

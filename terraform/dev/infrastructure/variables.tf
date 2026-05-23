@@ -158,7 +158,17 @@ variable "irsa_policy_arns" {
   type    = list(string)
   default = ["arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"]
 }
-
+variable "vpc_cni_namespace" {
+  type = string
+  default = "kube-system"
+}
+variable "vpc_cni_sa_name" {
+  type = string
+  default = "kube-system/aws-node"
+}
+variable "vpc_cni_irsa_policy_arns" {
+  type = list(string)
+}
 variable "db_engine" {
   type    = string
   default = "postgres"
