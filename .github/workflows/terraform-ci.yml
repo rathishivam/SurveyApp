@@ -42,22 +42,22 @@ jobs:
             terraform_version: 1.8.5
 
         - name: Terraform Init
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/infrastructure
           run: terraform init -input=false
 
         - name: Terraform Validate
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/infrastructure
           run: terraform validate
 
         - name: Terraform Plan
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/infrastructure
           run: terraform plan -out=tfplan -var-file=../terraform.tfvars
 
         - name: Upload Terraform Plan
           uses: actions/upload-artifact@v7.0.1
           with:
-            name: tfplan-${{ matrix.folder }}
-            path: terraform/dev/${{ matrix.folder }}/tfplan
+            name: tfplan-infrastructure
+            path: terraform/dev/infrastructure/tfplan
 
     apply-infra:
       needs: plan-infra
@@ -83,17 +83,17 @@ jobs:
             terraform_version: 1.8.5
 
         - name: Download Terraform Plan
-          uses: actions/download-artifact@v4
+          uses: actions/download-artifact@v5
           with:
-            name: tfplan-${{ matrix.folder }}
-            path: terraform/dev/${{ matrix.folder }}
+            name: tfplan-infrastructure
+            path: terraform/dev/infrastructure/tfplan
 
         - name: Terraform Init
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/infrastructure
           run: terraform init -input=false
 
         - name: Terraform Apply
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/infrastructure
           run: terraform apply -auto-approve tfplan
 
     plan-deployment:
@@ -106,7 +106,7 @@ jobs:
 
       strategy:
         matrix:
-          folder: [infrastructure]
+          folder: [deployment]
 
       steps:
         - name: Checkout code
@@ -124,22 +124,22 @@ jobs:
             terraform_version: 1.8.5
 
         - name: Terraform Init
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/deployment
           run: terraform init -input=false
 
         - name: Terraform Validate
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/deployment
           run: terraform validate
 
         - name: Terraform Plan
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/deployment
           run: terraform plan -out=tfplan -var-file=../terraform.tfvars
 
         - name: Upload Terraform Plan
           uses: actions/upload-artifact@v7.0.1
           with:
-            name: tfplan-${{ matrix.folder }}
-            path: terraform/dev/${{ matrix.folder }}/tfplan
+            name: tfplan-deployment
+            path: terraform/dev/deployment/tfplan
 
     apply-deployment:
       needs: plan-deployment
@@ -165,15 +165,15 @@ jobs:
             terraform_version: 1.8.5
 
         - name: Download Terraform Plan
-          uses: actions/download-artifact@v3
+          uses: actions/download-artifact@v5
           with:
-            name: tfplan-${{ matrix.folder }}
-            path: terraform/dev/${{ matrix.folder }}
+            name: tfplan-deployment
+            path: terraform/dev/deployment/tfplan
 
         - name: Terraform Init
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/deployment
           run: terraform init -input=false
 
         - name: Terraform Apply
-          working-directory: terraform/dev/${{ matrix.folder }}
+          working-directory: terraform/dev/deployment
           run: terraform apply -auto-approve tfplan
