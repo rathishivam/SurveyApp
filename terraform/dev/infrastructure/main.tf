@@ -59,7 +59,7 @@ data "tls_certificate" "cluster" {
 }
 
 module "irsa" {
-  source = "../../../modules/irsa"
+  source = "../../modules/irsa"
 
   project                   = var.project
   env                       = var.env

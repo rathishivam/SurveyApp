@@ -15,44 +15,86 @@ permissions:
   contents: read
 
 jobs:
-  terraform:
-    runs-on: ubuntu-latest
-    env:
-      AWS_REGION: ap-south-1
+    plan:
+      runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        folder: [infrastructure, deployment]
+      env:
+        AWS_REGION: ap-south-1
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6.0.2
+      strategy:
+        matrix:
+          folder: [infrastructure, deployment]
 
-      - name: Configure AWS Credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v6.1.1
-        with:
-          role-to-assume: arn:aws:iam::779403607170:role/GithubActionsAssumeRole
-          aws-region: ${{ env.AWS_REGION }}
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v6.0.2
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.5
+        - name: Configure AWS Credentials using OIDC
+          uses: aws-actions/configure-aws-credentials@v6.1.1
+          with:
+            role-to-assume: arn:aws:iam::779403607170:role/GithubActionsAssumeRole
+            aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform Init
-        working-directory: terraform/dev/${{ matrix.folder }}
-        run: terraform init -input=false
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: 1.8.5
 
-      - name: Terraform Validate
-        working-directory: terraform/dev/${{ matrix.folder }}
-        run: terraform validate
+        - name: Terraform Init
+          working-directory: terraform/dev/${{ matrix.folder }}
+          run: terraform init -input=false
 
-      - name: Terraform Plan
-        working-directory: terraform/dev/${{ matrix.folder }}
-        run: terraform plan -out=tfplan -var-file=../terraform.tfvars
+        - name: Terraform Validate
+          working-directory: terraform/dev/${{ matrix.folder }}
+          run: terraform validate
 
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: tfplan-${{ matrix.folder }}
-          path: terraform/dev/${{ matrix.folder }}/tfplan
+        - name: Terraform Plan
+          working-directory: terraform/dev/${{ matrix.folder }}
+          run: terraform plan -out=tfplan -var-file=../terraform.tfvars
+
+        - name: Upload Terraform Plan
+          uses: actions/upload-artifact@v7.0.1
+          with:
+            name: tfplan-${{ matrix.folder }}
+            path: terraform/dev/${{ matrix.folder }}/tfplan
+
+    apply:
+      needs: plan
+      runs-on: ubuntu-latest
+      environment: dev
+
+      env:
+        AWS_REGION: ap-south-1
+
+      strategy:
+        matrix:
+          folder: [infrastructure, deployment]
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v6.0.2
+
+        - name: Configure AWS Credentials using OIDC
+          uses: aws-actions/configure-aws-credentials@v6.1.1
+          with:
+            role-to-assume: arn:aws:iam::779403607170:role/GithubActionsAssumeRole
+            aws-region: ${{ env.AWS_REGION }}
+
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: 1.8.5
+
+        - name: Download Terraform Plan
+          uses: actions/download-artifact@v3
+          with:
+            name: tfplan-${{ matrix.folder }}
+            path: terraform/dev/${{ matrix.folder }}
+
+        - name: Terraform Init
+          working-directory: terraform/dev/${{ matrix.folder }}
+          run: terraform init -input=false
+
+        - name: Terraform Apply
+          working-directory: terraform/dev/${{ matrix.folder }}
+          run: terraform apply -auto-approve tfplan
