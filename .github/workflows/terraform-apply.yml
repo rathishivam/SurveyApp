@@ -1,28 +1,27 @@
-name: Terraform Plan
+name: Terraform Apply
 
 on:
-  push:
-    branches:
-      - main
-      - master
-  pull_request:
-    branches:
-      - main
-      - master
+  workflow_dispatch:
+    inputs:
+      folder:
+        description: "Terraform folder to apply"
+        required: true
+        type: choice
+        options:
+          - infrastructure
+          - deployment
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  terraform:
+  apply:
     runs-on: ubuntu-latest
+    environment: dev
+
     env:
       AWS_REGION: ap-south-1
-
-    strategy:
-      matrix:
-        folder: [infrastructure, deployment]
 
     steps:
       - name: Checkout code
@@ -40,19 +39,17 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Terraform Init
-        working-directory: terraform/dev/${{ matrix.folder }}
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
         run: terraform init -input=false
 
       - name: Terraform Validate
-        working-directory: terraform/dev/${{ matrix.folder }}
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
         run: terraform validate
 
-      - name: Terraform Plan
-        working-directory: terraform/dev/${{ matrix.folder }}
+      - name: Terraform Plan (recreate plan before apply)
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
         run: terraform plan -out=tfplan -var-file=../terraform.tfvars
 
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: tfplan-${{ matrix.folder }}
-          path: terraform/dev/${{ matrix.folder }}/tfplan
+      - name: Terraform Apply
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
+        run: terraform apply -auto-approve tfplan
