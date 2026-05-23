@@ -57,7 +57,7 @@ jobs:
           uses: actions/upload-artifact@v7.0.1
           with:
             name: tfplan-infrastructure
-            path: terraform/dev/infrastructure/tfplan
+            path: terraform/dev/infrastructure
 
     apply-infra:
       needs: plan-infra
@@ -86,7 +86,7 @@ jobs:
           uses: actions/download-artifact@v5
           with:
             name: tfplan-infrastructure
-            path: terraform/dev/infrastructure/tfplan
+            path: terraform/dev/infrastructure
 
         - name: Terraform Init
           working-directory: terraform/dev/infrastructure
@@ -139,7 +139,7 @@ jobs:
           uses: actions/upload-artifact@v7.0.1
           with:
             name: tfplan-deployment
-            path: terraform/dev/deployment/tfplan
+            path: terraform/dev/deployment
 
     apply-deployment:
       needs: plan-deployment
@@ -168,7 +168,7 @@ jobs:
           uses: actions/download-artifact@v5
           with:
             name: tfplan-deployment
-            path: terraform/dev/deployment/tfplan
+            path: terraform/dev/deployment
 
         - name: Terraform Init
           working-directory: terraform/dev/deployment
