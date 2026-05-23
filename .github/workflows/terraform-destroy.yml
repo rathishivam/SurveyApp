@@ -2,6 +2,14 @@ name: Terraform Destroy
 
 on:
   workflow_dispatch:
+    inputs:
+      folder:
+        description: "Terraform folder to destroy"
+        required: true
+        type: choice
+        options:
+          - infrastructure
+          - deployment
 
 permissions:
   id-token: write
@@ -30,9 +38,9 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Terraform Init
-        working-directory: terraform/dev
-        run: terraform init
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
+        run: terraform init -input=false
 
       - name: Terraform Destroy
-        working-directory: terraform/dev
-        run: terraform destroy -auto-approve
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
+        run: terraform destroy -auto-approve -var-file=../terraform.tfvars

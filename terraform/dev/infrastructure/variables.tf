@@ -1,6 +1,3 @@
-# Dev environment variables
-# These values are specific to the development environment.
-
 variable "project" {
   type    = string
   default = "survey-app"
@@ -108,7 +105,28 @@ variable "eks_node_max_size" {
 
 variable "eks_addon_names" {
   type    = list(string)
-  default = ["vpc-cni", "coredns", "kube-proxy"]
+  default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver"]
+}
+
+variable "aws_lb_controller_chart_version" {
+  type    = string
+  default = ""
+}
+
+variable "aws_lb_controller_service_account_name" {
+  type    = string
+  default = "aws-load-balancer-controller"
+}
+
+variable "argocd_ingress_host" {
+  type    = string
+  default = "argocd.rathilabs.space"
+}
+
+variable "argocd_acm_certificate_arn" {
+  type        = string
+  description = "ACM certificate ARN for ArgoCD ALB TLS"
+  default     = ""
 }
 
 variable "ui_bucket_name" {
@@ -126,52 +144,19 @@ variable "argocd_chart_version" {
   default = "5.47.0"
 }
 
-variable "argocd_app_project" {
-  type        = string
-  description = "ArgoCD project to assign the Application to"
-  default     = "default"
+variable "irsa_service_account_name" {
+  type    = string
+  default = "survey-backend-sa"
 }
 
-variable "argocd_app_repo_url" {
-  type        = string
-  description = "Git repo URL that ArgoCD should monitor"
-  default     = "https://github.com/example/survey-app.git"
+variable "irsa_service_account_namespace" {
+  type    = string
+  default = "default"
 }
 
-variable "argocd_app_repo_path" {
-  type        = string
-  description = "Path inside the Git repo to the deployment manifests or chart"
-  default     = "deploy/argocd"
-}
-
-variable "argocd_app_repo_revision" {
-  type        = string
-  description = "Git branch, tag, or revision for the ArgoCD Application"
-  default     = "HEAD"
-}
-
-variable "argocd_app_destination_namespace" {
-  type        = string
-  description = "Namespace into which the ArgoCD Application should deploy resources"
-  default     = "default"
-}
-
-variable "argocd_app_sync_enabled" {
-  type        = bool
-  description = "Enable automated sync for the ArgoCD Application"
-  default     = true
-}
-
-variable "argocd_app_prune" {
-  type        = bool
-  description = "Enable pruning of resources removed from Git"
-  default     = true
-}
-
-variable "argocd_app_self_heal" {
-  type        = bool
-  description = "Enable self-healing for the ArgoCD Application"
-  default     = true
+variable "irsa_policy_arns" {
+  type    = list(string)
+  default = ["arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"]
 }
 
 variable "db_engine" {
@@ -230,4 +215,3 @@ variable "db_deletion_protection" {
   type    = bool
   default = false
 }
-

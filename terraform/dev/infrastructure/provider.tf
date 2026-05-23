@@ -26,19 +26,17 @@ provider "aws" {
 provider "kubernetes" {
   host                   = module.eks.endpoint
   cluster_ca_certificate = base64decode(module.eks.certificate_authority_data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
+  token                  = data.aws_eks_cluster_auth.this.token
 }
 
 provider "helm" {
   kubernetes {
     host                   = module.eks.endpoint
     cluster_ca_certificate = base64decode(module.eks.certificate_authority_data)
-    token                  = data.aws_eks_cluster_auth.cluster.token
+    token                  = data.aws_eks_cluster_auth.this.token
   }
 }
 
-data "aws_eks_cluster_auth" "cluster" {
+data "aws_eks_cluster_auth" "this" {
   name = module.eks.cluster_name
-
-  depends_on = [module.eks]
 }

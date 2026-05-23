@@ -1,14 +1,15 @@
-# .github/workflows/terraform.yml
-
-name: Terraform AWS OIDC
+name: Terraform CI
 
 on:
-  push:
-    branches:
-      - master
-
   workflow_dispatch:
     inputs:
+      folder:
+        description: "Terraform folder to run"
+        required: true
+        type: choice
+        options:
+          - infrastructure
+          - deployment
       action:
         description: "Terraform action to run"
         required: true
@@ -17,14 +18,13 @@ on:
         options:
           - plan
           - apply
-          - destroy
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  terraform-plan:
+  terraform:
     runs-on: ubuntu-latest
 
     env:
@@ -46,57 +46,26 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Terraform Init
-        working-directory: terraform/dev
-        run: terraform init
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
+        run: terraform init -input=false
 
       - name: Terraform Validate
-        working-directory: terraform/dev
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: terraform/dev
-        run: terraform plan -out=tfplan
+        if: ${{ github.event.inputs.action == 'plan' || github.event.inputs.action == 'apply' }}
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
+        run: terraform plan -out=tfplan -var-file=../terraform.tfvars
 
       - name: Upload Terraform Plan
+        if: ${{ github.event.inputs.action == 'plan' }}
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: tfplan
-          path: terraform/dev/tfplan
-
-  terraform-apply:
-    name: Terraform Apply
-    needs: terraform-plan
-    runs-on: ubuntu-latest
-
-    # Manual approval happens here
-    environment:
-      name: dev
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v6.0.2
-
-      - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6.1.1
-        with:
-          role-to-assume: arn:aws:iam::779403607170:role/GithubActionsAssumeRole
-          aws-region: ap-south-1
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.5
-
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-          path: terraform/dev
-
-      - name: Terraform Init
-        working-directory: terraform/dev
-        run: terraform init
+          name: tfplan-${{ github.event.inputs.folder }}
+          path: terraform/dev/${{ github.event.inputs.folder }}/tfplan
 
       - name: Terraform Apply
-        working-directory: terraform/dev
+        if: ${{ github.event.inputs.action == 'apply' }}
+        working-directory: terraform/dev/${{ github.event.inputs.folder }}
         run: terraform apply -auto-approve tfplan
