@@ -60,7 +60,6 @@ data "tls_certificate" "cluster" {
 
 module "irsa" {
   source = "../../modules/irsa"
-
   project                   = var.project
   env                       = var.env
   cluster_name              = module.eks.cluster_name
@@ -79,11 +78,12 @@ module "irsa_vpc_cni" {
     service_account_namespace = var.vpc_cni_namespace
     service_account_name = var.vpc_cni_sa_name
     policy_arns = var.vpc_cni_irsa_policy_arns
+    depends_on = [module.eks]
 }
 data "aws_iam_openid_connect_provider" "eks" {
   url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
 
-  depends_on = [module.irsa]
+  depends_on = [module.irsa,module.eks]
 }
 
 resource "aws_iam_role" "lb_controller" {
@@ -108,7 +108,7 @@ data "aws_iam_policy_document" "lb_controller_assume" {
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(data.aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")} :sub"
+      variable = "${replace(data.aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:sub"
       values   = ["system:serviceaccount:kube-system:${var.aws_lb_controller_service_account_name}"]
     }
   }
