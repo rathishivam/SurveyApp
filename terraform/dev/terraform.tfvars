@@ -7,6 +7,7 @@ tags = {
   Environment = "dev"
   Project     = "survey-app"
 }
+
 enable_nat_gateway = true
 public_subnets = [
   {
