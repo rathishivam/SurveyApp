@@ -44,7 +44,9 @@ eks_addon_names                = ["vpc-cni", "coredns", "kube-proxy"]
 vpc_cni_irsa_policy_arns = ["arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"]
 vpc_cni_sa_name ="aws-node"
 vpc_cni_namespace = "kube-system"
-
+aws_lb_controller_service_account_name = "aws-load-balancer-controller"
+aws_lb_controller_chart_version = "1.4.0"
+aws_lb_controller_irsa_policy_arns = ["arn:aws:iam::779403607170:policy/AWSLoadBalancerControllerIAMPolicy"]
 ui_bucket_name                 = "survey-app-dev-ui-bucket"
 cloudfront_default_root_object = "index.html"
 argocd_chart_version           = "5.47.0"

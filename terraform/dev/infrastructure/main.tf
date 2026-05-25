@@ -58,29 +58,43 @@ data "tls_certificate" "cluster" {
   url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
 
-module "irsa" {
-  source = "../../modules/irsa"
-  project                   = var.project
-  env                       = var.env
-  cluster_name              = module.eks.cluster_name
-  service_account_namespace = var.irsa_service_account_namespace
-  service_account_name      = var.irsa_service_account_name
-  policy_arns               = var.irsa_policy_arns
-  tags                      = merge(var.tags, { Service = "irsa" })
-  openid_eks_arn = module.eks.openid_eks_arn
-  oidc_provider_url = module.eks.oidc_provider_url
-  depends_on = [module.eks]
-}
-# module "irsa_vpc_cni" {
-#     source = "../../modules/irsa"
-#     project = var.project
-#     env = var.env
-#     cluster_name = module.eks.cluster_name
-#     service_account_namespace = var.vpc_cni_namespace
-#     service_account_name = var.vpc_cni_sa_name
-#     policy_arns = var.vpc_cni_irsa_policy_arns
-#     depends_on = [module.eks]
+# module "irsa" {
+#   source = "../../modules/irsa"
+#   project                   = var.project
+#   env                       = var.env
+#   cluster_name              = module.eks.cluster_name
+#   service_account_namespace = var.irsa_service_account_namespace
+#   service_account_name      = var.irsa_service_account_name
+#   policy_arns               = var.irsa_policy_arns
+#   tags                      = merge(var.tags, { Service = "irsa" })
+#   openid_eks_arn = module.eks.openid_eks_arn
+#   oidc_provider_url = module.eks.oidc_provider_url
+#   depends_on = [module.eks]
 # }
+module "irsa_vpc_cni" {
+    source = "../../modules/irsa"
+    project = var.project
+    env = var.env
+    cluster_name = module.eks.cluster_name
+    service_account_namespace = var.vpc_cni_namespace
+    service_account_name = var.vpc_cni_sa_name
+    policy_arns = var.vpc_cni_irsa_policy_arns
+    openid_eks_arn = module.eks.openid_eks_arn
+    oidc_provider_url = module.eks.oidc_provider_url
+    depends_on = [module.eks]
+}
+module "irsa_lb_controller" {
+    source = "../../modules/irsa"
+    project = var.project
+    env = var.env
+    cluster_name = module.eks.cluster_name
+    service_account_namespace = var.vpc_cni_namespace
+    service_account_name = var.aws_lb_controller_service_account_name
+    policy_arns = var.aws_lb_controller_irsa_policy_arns
+    openid_eks_arn = module.eks.openid_eks_arn
+    oidc_provider_url = module.eks.oidc_provider_url
+    depends_on = [module.eks]
+}
 # data "aws_iam_openid_connect_provider" "eks" {
 #   url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
 
@@ -143,51 +157,51 @@ serviceAccount:
   create: true
   name: ${var.aws_lb_controller_service_account_name}
   annotations:
-    eks.amazonaws.com/role-arn: ${aws_iam_role.lb_controller.arn}
+    eks.amazonaws.com/role-arn: ${module.irsa_lb_controller.irsa_role_arn}
 YAML
   ]
 
-  depends_on = [aws_iam_role.lb_controller]
+  depends_on = [module.irsa_lb_controller]
 }
 
-module "rds" {
-  source = "../../modules/rds"
+# module "rds" {
+#   source = "../../modules/rds"
 
-  name                    = "${var.project}-${var.env}-db"
-  vpc_id                  = module.vpc.vpc_id
-  subnet_ids              = module.vpc.private_subnet_ids
-  engine                  = var.db_engine
-  engine_version          = var.db_engine_version
-  port                    = var.db_port
-  username                = var.db_username
-  password                = var.db_password
-  instance_class          = var.db_instance_class
-  allocated_storage       = var.db_allocated_storage
-  allowed_cidr_blocks     = var.db_allowed_cidrs
-  publicly_accessible     = var.db_publicly_accessible
-  backup_retention_period = var.db_backup_retention_period
-  deletion_protection     = var.db_deletion_protection
+#   name                    = "${var.project}-${var.env}-db"
+#   vpc_id                  = module.vpc.vpc_id
+#   subnet_ids              = module.vpc.private_subnet_ids
+#   engine                  = var.db_engine
+#   engine_version          = var.db_engine_version
+#   port                    = var.db_port
+#   username                = var.db_username
+#   password                = var.db_password
+#   instance_class          = var.db_instance_class
+#   allocated_storage       = var.db_allocated_storage
+#   allowed_cidr_blocks     = var.db_allowed_cidrs
+#   publicly_accessible     = var.db_publicly_accessible
+#   backup_retention_period = var.db_backup_retention_period
+#   deletion_protection     = var.db_deletion_protection
 
-  tags = merge(var.tags, { Service = "rds" })
-}
+#   tags = merge(var.tags, { Service = "rds" })
+# }
 
-module "ui_bucket" {
-  source = "../../modules/s3"
+# module "ui_bucket" {
+#   source = "../../modules/s3"
 
-  bucket_name   = var.ui_bucket_name
-  force_destroy = true
-  tags          = merge(var.tags, { Service = "ui" })
-}
+#   bucket_name   = var.ui_bucket_name
+#   force_destroy = true
+#   tags          = merge(var.tags, { Service = "ui" })
+# }
 
-module "cdn" {
-  source = "../../modules/cloudfront"
+# module "cdn" {
+#   source = "../../modules/cloudfront"
 
-  name                = "${var.project}-${var.env}-ui-cdn"
-  bucket_name         = module.ui_bucket.bucket_name
-  bucket_domain_name  = module.ui_bucket.bucket_regional_domain_name
-  default_root_object = var.cloudfront_default_root_object
-  tags                = merge(var.tags, { Service = "ui" })
-}
+#   name                = "${var.project}-${var.env}-ui-cdn"
+#   bucket_name         = module.ui_bucket.bucket_name
+#   bucket_domain_name  = module.ui_bucket.bucket_regional_domain_name
+#   default_root_object = var.cloudfront_default_root_object
+#   tags                = merge(var.tags, { Service = "ui" })
+# }
 
 module "argocd" {
   source = "../../modules/argocd"
