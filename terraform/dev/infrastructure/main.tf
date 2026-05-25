@@ -75,6 +75,7 @@ module "irsa_vpc_cni" {
     source = "../../modules/irsa"
     project = var.project
     env = var.env
+    role_name = var.irsa_vpc_cni_role_name
     cluster_name = module.eks.cluster_name
     service_account_namespace = var.vpc_cni_namespace
     service_account_name = var.vpc_cni_sa_name
@@ -87,6 +88,7 @@ module "irsa_lb_controller" {
     source = "../../modules/irsa"
     project = var.project
     env = var.env
+    role_name = var.irsa_lb_controller_role_name
     cluster_name = module.eks.cluster_name
     service_account_namespace = var.aws_lb_controller_service_account_namespace
     service_account_name = var.aws_lb_controller_service_account_name
