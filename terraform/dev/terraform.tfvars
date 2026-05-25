@@ -36,6 +36,7 @@ private_subnets = [
   }
 ]
 eks_cluster_version            = "1.35"
+eks_admin_arn = "arn:aws:iam::779403607170:user/shivam.rathi"
 eks_node_instance_type         = "t3a.medium"
 eks_node_desired_size          = 2
 eks_node_min_size              = 2

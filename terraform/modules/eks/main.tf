@@ -32,7 +32,22 @@ resource "aws_eks_cluster" "this" {
     Name = var.cluster_name
   })
 }
+resource "aws_eks_access_entry" "user_access" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = var.eks_admin_arn
 
+  type = "STANDARD"
+}
+resource "aws_eks_access_policy_association" "user_admin" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = aws_eks_access_entry.user_access.principal_arn
+
+  policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+}
 resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
   node_role_arn   = var.node_role_arn

@@ -44,7 +44,7 @@ module "eks" {
   node_desired_size  = var.eks_node_desired_size
   node_min_size      = var.eks_node_min_size
   node_max_size      = var.eks_node_max_size
-
+  eks_admin_arn    = var.eks_admin_arn
   tags = merge(var.tags, { Service = "eks" })
 }
 
