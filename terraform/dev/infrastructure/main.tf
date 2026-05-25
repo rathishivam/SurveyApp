@@ -67,19 +67,20 @@ module "irsa" {
   service_account_name      = var.irsa_service_account_name
   policy_arns               = var.irsa_policy_arns
   tags                      = merge(var.tags, { Service = "irsa" })
-
+  openid_eks_arn = module.eks.openid_eks_arn
+  oidc_provider_url = module.eks.oidc_provider_url
   depends_on = [module.eks]
 }
-module "irsa_vpc_cni" {
-    source = "../../modules/irsa"
-    project = var.project
-    env = var.env
-    cluster_name = module.eks.cluster_name
-    service_account_namespace = var.vpc_cni_namespace
-    service_account_name = var.vpc_cni_sa_name
-    policy_arns = var.vpc_cni_irsa_policy_arns
-    depends_on = [module.eks]
-}
+# module "irsa_vpc_cni" {
+#     source = "../../modules/irsa"
+#     project = var.project
+#     env = var.env
+#     cluster_name = module.eks.cluster_name
+#     service_account_namespace = var.vpc_cni_namespace
+#     service_account_name = var.vpc_cni_sa_name
+#     policy_arns = var.vpc_cni_irsa_policy_arns
+#     depends_on = [module.eks]
+# }
 data "aws_iam_openid_connect_provider" "eks" {
   url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
 
@@ -105,6 +106,9 @@ data "aws_iam_policy_document" "lb_controller_assume" {
       type        = "Federated"
       identifiers = [data.aws_iam_openid_connect_provider.eks.arn]
     }
+    actions = [
+      "sts:AssumeRoleWithWebIdentity"
+    ]
 
     condition {
       test     = "StringEquals"

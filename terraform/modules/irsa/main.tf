@@ -1,22 +1,22 @@
 locals {
   irsa_role_name = var.role_name != "" ? var.role_name : "${var.project}-${var.env}-irsa-role"
-  oidc_provider_url = data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer
-  service_account_subject = "${replace(local.oidc_provider_url, "https://", "")}:sub"
+#   oidc_provider_url = data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+  service_account_subject = "${replace(var.oidc_provider_url, "https://", "")}:sub"
 }
 
 data "aws_eks_cluster" "cluster" {
   name = var.cluster_name
 }
 
-data "tls_certificate" "cluster" {
-  url = local.oidc_provider_url
-}
+# data "tls_certificate" "cluster" {
+#   url = local.oidc_provider_url
+# }
 
-resource "aws_iam_openid_connect_provider" "eks" {
-  url             = local.oidc_provider_url
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
-}
+# resource "aws_iam_openid_connect_provider" "eks" {
+#   url             = local.oidc_provider_url
+#   client_id_list  = ["sts.amazonaws.com"]
+#   thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
+# }
 
 resource "aws_iam_role" "irsa_role" {
   name               = local.irsa_role_name
@@ -37,7 +37,8 @@ data "aws_iam_policy_document" "irsa_assume" {
     effect = "Allow"
     principals {
       type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+    #   identifiers = [aws_iam_openid_connect_provider.eks.arn]
+    identifiers = [var.openid_eks_arn]
     }
 
     condition {

@@ -42,3 +42,10 @@ variable "role_name" {
   description = "Optional explicit name for the IRSA IAM role"
   default     = ""
 }
+
+variable "openid_eks_arn" {
+  type = string
+}
+variable "oidc_provider_url" {
+  type = string
+}
