@@ -214,27 +214,34 @@ module "argocd" {
 server:
   service:
     type: ClusterIP
+
   ingress:
     enabled: true
     ingressClassName: alb
+
     annotations:
       kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/certificate-arn: ${var.argocd_acm_certificate_arn}
+
     hosts:
-      - host: ${var.argocd_ingress_host}
-        paths:
-          - path: /
-            pathType: Prefix
+      - ${var.argocd_ingress_host}
+
+    paths:
+      - /
+
+    pathType: Prefix
+
     tls:
       - hosts:
           - ${var.argocd_ingress_host}
         secretName: argocd-tls
+
 dex:
   enabled: false
 YAML
-  ]
+]
 
   depends_on = [module.eks_addons, module.aws_lb_controller]
 }
