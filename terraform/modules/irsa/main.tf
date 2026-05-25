@@ -4,9 +4,9 @@ locals {
   service_account_subject = "${replace(var.oidc_provider_url, "https://", "")}:sub"
 }
 
-data "aws_eks_cluster" "cluster" {
-  name = var.cluster_name
-}
+# data "aws_eks_cluster" "cluster" {
+#   name = var.cluster_name
+# }
 
 # data "tls_certificate" "cluster" {
 #   url = local.oidc_provider_url
@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "irsa_assume" {
     #   identifiers = [aws_iam_openid_connect_provider.eks.arn]
     identifiers = [var.openid_eks_arn]
     }
-
+    actions = ["sts:AssumeRoleWithWebIdentity"]
     condition {
       test     = "StringEquals"
       variable = local.service_account_subject

@@ -1,7 +1,7 @@
 # EKS module
 # Creates an EKS cluster and a managed node group.
 locals {
-  oidc_provider_url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
+  oidc_provider_url = aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
 
 data "tls_certificate" "cluster" {

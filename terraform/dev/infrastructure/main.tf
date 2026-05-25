@@ -81,42 +81,42 @@ module "irsa" {
 #     policy_arns = var.vpc_cni_irsa_policy_arns
 #     depends_on = [module.eks]
 # }
-data "aws_iam_openid_connect_provider" "eks" {
-  url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
+# data "aws_iam_openid_connect_provider" "eks" {
+#   url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
 
-  depends_on = [module.irsa,module.eks]
-}
+#   depends_on = [module.irsa,module.eks]
+# }
 
-resource "aws_iam_role" "lb_controller" {
-  name               = "${var.project}-${var.env}-aws-lb-controller"
-  assume_role_policy = data.aws_iam_policy_document.lb_controller_assume.json
+# resource "aws_iam_role" "lb_controller" {
+#   name               = "${var.project}-${var.env}-aws-lb-controller"
+#   assume_role_policy = data.aws_iam_policy_document.lb_controller_assume.json
 
-  tags = merge(var.tags, { Name = "${var.project}-${var.env}-aws-lb-controller" })
-}
+#   tags = merge(var.tags, { Name = "${var.project}-${var.env}-aws-lb-controller" })
+# }
 
-resource "aws_iam_role_policy_attachment" "lb_controller_attach" {
-  role       = aws_iam_role.lb_controller.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
-}
+# resource "aws_iam_role_policy_attachment" "lb_controller_attach" {
+#   role       = aws_iam_role.lb_controller.name
+#   policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
+# }
 
-data "aws_iam_policy_document" "lb_controller_assume" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Federated"
-      identifiers = [data.aws_iam_openid_connect_provider.eks.arn]
-    }
-    actions = [
-      "sts:AssumeRoleWithWebIdentity"
-    ]
+# data "aws_iam_policy_document" "lb_controller_assume" {
+#   statement {
+#     effect = "Allow"
+#     principals {
+#       type        = "Federated"
+#       identifiers = [data.aws_iam_openid_connect_provider.eks.arn]
+#     }
+#     actions = [
+#       "sts:AssumeRoleWithWebIdentity"
+#     ]
 
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(data.aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:${var.aws_lb_controller_service_account_name}"]
-    }
-  }
-}
+#     condition {
+#       test     = "StringEquals"
+#       variable = "${replace(data.aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:sub"
+#       values   = ["system:serviceaccount:kube-system:${var.aws_lb_controller_service_account_name}"]
+#     }
+#   }
+# }
 
 module "eks_addons" {
   source = "../../modules/eks-addons"
