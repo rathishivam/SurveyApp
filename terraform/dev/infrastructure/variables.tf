@@ -219,9 +219,9 @@ variable "db_allocated_storage" {
   type    = number
   default = 20
 }
-variable "aws_lb_controller_irsa_policy_arns" {
+# variable "aws_lb_controller_irsa_policy_arns" {
   
-}
+# }
 variable "db_allowed_cidrs" {
   type        = list(string)
   description = "CIDR blocks allowed to connect to the DB (for dev/testing)"
