@@ -251,17 +251,17 @@ output "eks_endpoint" {
   value = module.eks.endpoint
 }
 
-output "rds_endpoint" {
-  value = module.rds.endpoint
-}
+# output "rds_endpoint" {
+#   value = module.rds.endpoint
+# }
 
-output "ui_bucket_name" {
-  value = module.ui_bucket.bucket_name
-}
+# output "ui_bucket_name" {
+#   value = module.ui_bucket.bucket_name
+# }
 
-output "cdn_domain" {
-  value = module.cdn.distribution_domain_name
-}
+# output "cdn_domain" {
+#   value = module.cdn.distribution_domain_name
+# }
 
 output "argocd_release" {
   value = module.argocd.release_name
