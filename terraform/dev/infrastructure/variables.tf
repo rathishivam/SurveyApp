@@ -144,6 +144,14 @@ variable "argocd_chart_version" {
   default = "5.47.0"
 }
 
+variable "irsa_vpc_cni_role_name" {
+   type = string
+}
+
+variable "irsa_lb_controller_role_name" {
+   type = string
+}
+
 variable "irsa_service_account_name" {
   type    = string
   default = "survey-backend-sa"
