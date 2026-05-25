@@ -215,6 +215,10 @@ server:
   service:
     type: ClusterIP
 
+  configs:
+  params:
+    server.insecure: true
+
   ingress:
     enabled: true
     ingressClassName: alb
