@@ -1,6 +1,6 @@
 output "oidc_provider_arn" {
-  description = "ARN of the created IAM OIDC provider for the EKS cluster"
-  value       = aws_iam_openid_connect_provider.eks.arn
+  description = "ARN of the EKS cluster OIDC provider"
+  value       = var.openid_eks_arn
 }
 
 output "irsa_role_arn" {
@@ -15,5 +15,5 @@ output "irsa_role_name" {
 
 output "oidc_issuer" {
   description = "OIDC issuer URL for the EKS cluster"
-  value       = data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+  value       = var.oidc_provider_url
 }

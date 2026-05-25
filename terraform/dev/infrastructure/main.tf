@@ -88,7 +88,7 @@ module "irsa_lb_controller" {
     project = var.project
     env = var.env
     cluster_name = module.eks.cluster_name
-    service_account_namespace = var.vpc_cni_namespace
+    service_account_namespace = var.aws_lb_controller_service_account_namespace
     service_account_name = var.aws_lb_controller_service_account_name
     policy_arns = var.aws_lb_controller_irsa_policy_arns
     openid_eks_arn = module.eks.openid_eks_arn
@@ -269,10 +269,15 @@ output "argocd_release" {
 
 output "oidc_provider_arn" {
   description = "ARN of the created IAM OIDC provider for the EKS cluster"
-  value       = module.irsa.oidc_provider_arn
+  value       = module.eks.openid_eks_arn
 }
 
-output "irsa_role_arn" {
-  description = "IRSA IAM role ARN created for service account"
-  value       = module.irsa.irsa_role_arn
+output "irsa_lb_controller_role_arn" {
+  description = "IRSA IAM role ARN created for the AWS Load Balancer Controller service account"
+  value       = module.irsa_lb_controller.irsa_role_arn
+}
+
+output "irsa_vpc_cni_role_arn" {
+  description = "IRSA IAM role ARN created for the VPC CNI service account"
+  value       = module.irsa_vpc_cni.irsa_role_arn
 }

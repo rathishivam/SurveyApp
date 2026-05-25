@@ -37,10 +37,10 @@ data "aws_iam_policy_document" "irsa_assume" {
     effect = "Allow"
     principals {
       type        = "Federated"
-    #   identifiers = [aws_iam_openid_connect_provider.eks.arn]
-    identifiers = [var.openid_eks_arn]
+      identifiers = [var.openid_eks_arn]
     }
     actions = ["sts:AssumeRoleWithWebIdentity"]
+
     condition {
       test     = "StringEquals"
       variable = local.service_account_subject
