@@ -211,13 +211,13 @@ module "argocd" {
   release_name  = "${var.project}-${var.env}-argocd"
   chart_version = var.argocd_chart_version
   values = [<<YAML
+configs:
+  params:
+    server.insecure: "true"
+
 server:
   service:
     type: ClusterIP
-
-  configs:
-    params:
-      server.insecure: true
 
   ingress:
     enabled: true
@@ -229,6 +229,7 @@ server:
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/healthcheck-path: /healthz
+      alb.ingress.kubernetes.io/healthcheck-port: traffic-port
       alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
       alb.ingress.kubernetes.io/success-codes: "200"
       alb.ingress.kubernetes.io/certificate-arn: ${var.argocd_acm_certificate_arn}
