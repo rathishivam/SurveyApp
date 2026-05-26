@@ -216,8 +216,8 @@ server:
     type: ClusterIP
 
   configs:
-  params:
-    server.insecure: true
+    params:
+      server.insecure: true
 
   ingress:
     enabled: true
