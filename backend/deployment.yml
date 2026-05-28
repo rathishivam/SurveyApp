@@ -5,37 +5,21 @@ metadata:
 
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: survey-app-dev
+data:
+  SECRET_MANAGER_NAME: rds!db-7b7fc848-82ea-46e5-abb5-2c9128e4bbac
+
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: backend-sa
   namespace: survey-app-dev
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::779403607170:role/survery-app-backend-sa
-
----
-apiVersion: secrets-store.csi.x-k8s.io/v1
-kind: SecretProviderClass
-metadata:
-  name: backend-secrets
-  namespace: survey-app-dev
-
-spec:
-  provider: aws
-
-  parameters:
-    objects: |
-      - objectName: "rds!db-7b7fc848-82ea-46e5-abb5-2c9128e4bbac"
-        objectType: "secretsmanager"
-        jmesPath:
-          - path: "DATABASE_URL"
-            objectAlias: "DATABASE_URL"
-
-  secretObjects:
-    - secretName: backend-secret
-      type: Opaque
-      data:
-        - objectName: DATABASE_URL
-          key: DATABASE_URL
 
 ---
 apiVersion: apps/v1
@@ -59,14 +43,6 @@ spec:
     spec:
       serviceAccountName: backend-sa
 
-      volumes:
-        - name: secrets-store-inline
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: backend-secrets
-
       containers:
         - name: backend
           image: 779403607170.dkr.ecr.ap-south-1.amazonaws.com/backend:latest
@@ -75,16 +51,11 @@ spec:
             - containerPort: 8000
 
           env:
-            - name: DATABASE_URL
+            - name: SECRET_MANAGER_NAME_ENV
               valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: DATABASE_URL
-
-          volumeMounts:
-            - name: secrets-store-inline
-              mountPath: /mnt/secrets-store
-              readOnly: true
+                configMapKeyRef:
+                  name: backend-config
+                  key: SECRET_MANAGER_NAME
 
           resources:
             requests:
@@ -138,14 +109,25 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: survey-app
     alb.ingress.kubernetes.io/healthcheck-path: /health
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-south-1:779403607170:certificate/12345678-1234-1234-1234-123456789012"
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
 
 spec:
+  ingressClassName: alb
   rules:
     - http:
         paths:
           - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 80
+          - path: /api/*
             pathType: Prefix
             backend:
               service:

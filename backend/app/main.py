@@ -1,19 +1,54 @@
 """
 FastAPI application entry point
 """
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import Base, engine
+from database import Base, get_engine, refresh_database_engine
 from routes.survey import router as survey_router
 
-# Create all database tables
-Base.metadata.create_all(bind=engine)
+logger = logging.getLogger(__name__)
+
+
+async def refresh_database_secrets():
+    """
+    Refresh database secrets every hour.
+    """
+    while True:
+        await asyncio.sleep(60 * 60)
+        try:
+            await asyncio.to_thread(refresh_database_engine)
+        except Exception:
+            logger.exception("Failed to refresh database secrets")
+
+
+@asynccontextmanager
+async def lifespan(app):
+    """
+    Initialize database settings and schedule periodic secret refresh.
+    """
+    await asyncio.to_thread(refresh_database_engine)
+    Base.metadata.create_all(bind=get_engine())
+
+    refresh_task = asyncio.create_task(refresh_database_secrets())
+    try:
+        yield
+    finally:
+        refresh_task.cancel()
+        try:
+            await refresh_task
+        except asyncio.CancelledError:
+            pass
 
 # Create FastAPI app
 app = FastAPI(
     title="Survey App API",
     description="A simple survey application API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Add CORS middleware to allow frontend requests
